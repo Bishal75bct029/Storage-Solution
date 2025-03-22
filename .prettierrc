@@ -1,0 +1,17 @@
+{
+  "printWidth": 120,
+  "tabWidth": 2,
+  "useTabs": false,
+  "semi": true,
+  "singleQuote": false,
+  "trailingComma": "all",
+  "arrowParens": "always",
+  "endOfLine": "auto",
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "sortingMethod": "alphabetical",
+  "importTypeOrder": ["NPMPackages", "localImports"],
+  "newlineBetweenTypes": true,
+  "tailwindConfig": "./tailwind.config.js",
+  "tailwindFunctions": ["clsx"],
+  "tailwindPreserveDuplicates": true
+}
