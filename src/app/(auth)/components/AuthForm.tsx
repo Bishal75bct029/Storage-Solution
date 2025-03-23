@@ -13,12 +13,16 @@ import { Button } from "@/components/ui/button";
 import { signInSchema, signUpSchema } from "../authSchema";
 import { cn } from "@/lib/utils";
 import OtpDialog from "./OtpDIalog";
+import { login, signUp } from "@/actions";
 
 type AuthType = "sign-in" | "sign-up";
 
 const AuthForm = ({ type }: { type: AuthType }) => {
   const authSchema = type === "sign-up" ? signUpSchema : signInSchema;
   const [isLoading, setIsLoading] = useState(false);
+  const [accountId, setAccountId] = useState<string | null>(null);
+
+  const [openDialog, setOpenDialog] = useState(false);
 
   const form = useForm<z.infer<typeof signUpSchema | typeof signInSchema>>({
     resolver: zodResolver(authSchema),
@@ -29,19 +33,35 @@ const AuthForm = ({ type }: { type: AuthType }) => {
     mode: "onChange",
   });
 
-  function onSubmit(values: z.infer<typeof signInSchema | typeof signUpSchema>) {
+  const onSubmit = async (values: z.infer<typeof signInSchema | typeof signUpSchema>) => {
     setIsLoading(true);
-    if (type === "sign-up") {
-    } else {
-      console.log(values.email);
+    try {
+      const user =
+        type === "sign-up"
+          ? await signUp({ fullName: "username" in values ? values.username : "", email: values.email })
+          : await login({ email: values.email });
+
+      if (!user.accountId) throw new Error("User not found");
+
+      setAccountId(user.accountId);
+      setOpenDialog(true);
+    } catch {
+      console.log("hello");
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
-  }
+  };
 
   return (
     <>
       <Form {...form}>
-        <OtpDialog email="" />
+        <OtpDialog
+          email={form.getValues("email")}
+          setAccountId={setAccountId}
+          accountId={accountId}
+          openDialog={openDialog}
+          setOpenDialog={setOpenDialog}
+        />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="mx-12 my-auto flex w-full flex-col justify-center space-y-8 lg:mx-0 lg:w-1/3"

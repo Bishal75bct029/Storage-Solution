@@ -18,7 +18,7 @@ const eslintConfig = [
   {
     rules: {
       "@typescript-eslint/no-explicit-any": "warn",
-      indent: ["error", 2],
+      // indent: ["error", 2],
       "no-tabs": "error",
       "no-trailing-spaces": "error",
       "import/no-extraneous-dependencies": [

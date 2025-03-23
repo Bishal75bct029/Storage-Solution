@@ -19,6 +19,28 @@ export const getUserByEmail = async (email: string) => {
   return user.length ? user[0] : null;
 };
 
+export const verifySecret = async (accountId: string, password: string) => {
+  try {
+    const { account } = await createAdminClient();
+
+    console.log(accountId, "this is secret");
+    const session = await account.createSession(accountId, password);
+    (await cookies()).set("appwrite-session", session.secret, {
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: false,
+    });
+
+    console.log(session, "session ONly");
+    console.log((await cookies()).get("appwrite-session"), "this is ession", session.secret);
+    return { sessionId: session.$id };
+  } catch (error) {
+    console.log("are you here err", error);
+    throw error;
+  }
+};
+
 export const sendEmailOtp = async (email: string) => {
   const { account } = await createAdminClient();
 
@@ -36,6 +58,7 @@ export const getCurrentUser = async () => {
     const { databases, account } = await createSessionClient();
 
     const result = await account.get();
+    console.log(result, "here is result");
 
     const { documents } = await databases.listDocuments(envConfig.databaseId!, envConfig.usersCollectionId!, [
       Query.equal("accountId", result.$id),
@@ -64,6 +87,7 @@ export const logout = async () => {
 export const login = async ({ email }: { email: string }) => {
   try {
     const existingUser = await getUserByEmail(email);
+    console.log(existingUser?.accountId);
 
     if (existingUser) {
       await sendEmailOtp(email);

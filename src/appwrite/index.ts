@@ -24,6 +24,11 @@ export const createSessionClient = async () => {
 };
 
 export const createAdminClient = async () => {
+  const client = new Client()
+    .setEndpoint(envConfig.endpointUrl!)
+    .setProject(envConfig.projectId!)
+    .setKey(envConfig.secretKey!);
+
   return {
     get account() {
       return new Account(client);
