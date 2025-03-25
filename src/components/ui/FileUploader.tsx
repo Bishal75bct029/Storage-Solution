@@ -21,12 +21,13 @@ interface Props {
 
 const FileUploader = ({ ownerId, accountId, className }: Props) => {
   const path = usePathname();
-  console.log(accountId, "in fileuploader");
   //   const { toast } = useToast();
   const [files, setFiles] = useState<File[]>([]);
+  console.log(files, "here is me");
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
+      console.log(acceptedFiles, "accepted");
       setFiles(acceptedFiles);
 
       const uploadPromises = acceptedFiles.map(async (file) => {
@@ -44,9 +45,8 @@ const FileUploader = ({ ownerId, accountId, className }: Props) => {
           //   });
         }
 
-        console.log(accountId, "no account id or");
-
         return uploadFile({ file, ownerId, accountId, path }).then((uploadedFile) => {
+          console.log("boy");
           if (uploadedFile) {
             setFiles((prevFiles) => prevFiles.filter((f) => f.name !== file.name));
           }

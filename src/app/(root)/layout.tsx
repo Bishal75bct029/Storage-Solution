@@ -11,12 +11,10 @@ const layout = async ({ children }: { children: Promise<React.ReactNode> }) => {
 
   if (!currentUser) return redirect("/sign-in");
 
-  console.log(currentUser, "top level");
-
   return (
     <div className="flex h-screen">
-      <LeftSidebar />
-      <div className="flex h-full w-full flex-col p-6">
+      <LeftSidebar user={currentUser} />
+      <div className="flex h-full w-full flex-col gap-4">
         <Header userId={currentUser.$id} accountId={currentUser.accountId} />
         {await children}
       </div>

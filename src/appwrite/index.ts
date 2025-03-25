@@ -3,10 +3,12 @@ import { Account, Avatars, Client, Databases, Storage } from "node-appwrite";
 import { envConfig } from "@/config";
 import { cookies } from "next/headers";
 
-const client = new Client();
-client.setEndpoint(envConfig.endpointUrl!).setProject(envConfig.projectId!);
+// const client = new Client();
+// client.setEndpoint(envConfig.endpointUrl!).setProject(envConfig.projectId!);
 
 export const createSessionClient = async () => {
+  const client = new Client();
+  client.setEndpoint(envConfig.endpointUrl!).setProject(envConfig.projectId!);
   const session = (await cookies()).get("appwrite-session");
 
   if (!session || !session.value) throw new Error("No session");

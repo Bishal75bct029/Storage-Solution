@@ -29,13 +29,16 @@ const Searchbar = () => {
       return;
     }
 
+    console.log("nepali babu", query);
     const delayFetch = setTimeout(async () => {
+      console.log("it is called");
       setResults([]);
       setOpen(false);
       router.push(path.replace(searchParams.toString(), ""));
 
-      // const files = await getFiles({ types: [], searchText: query });
-      // setResults(files.documents);
+      const files = await getFiles({ types: [], searchText: query });
+      console.log(files, "here are results of search");
+      setResults(files.documents);
       setOpen(true);
     }, 500);
 
@@ -51,6 +54,7 @@ const Searchbar = () => {
   const handleClickItem = (file: Models.Document) => {
     setOpen(false);
     setResults([]);
+    setQuery("");
 
     router.push(`/${file.type === "video" || file.type === "audio" ? "media" : file.type + "s"}?query=${query}`);
   };
@@ -72,12 +76,10 @@ const Searchbar = () => {
                 <li className="flex items-center justify-between" key={file.$id} onClick={() => handleClickItem(file)}>
                   <div className="flex cursor-pointer items-center gap-4">
                     <Thumbnail type={file.type} extension={file.extension} url={file.url} className="size-9 min-w-9" />
-                    <p className="subtitle-2 text-light-100 line-clamp-1">{file.name}</p>
+                    <p className="subtitle2 text-dark-grey line-clamp-1">{file.name}</p>
                   </div>
 
-                  <p className={cn("body-1 text-light-200 caption text-light-200 line-clamp-1")}>
-                    {formatDateTime(file.$createdAt)}
-                  </p>
+                  <p className={cn("body1 caption text-light-grey line-clamp-1")}>{formatDateTime(file.$createdAt)}</p>
                 </li>
               ))
             ) : (

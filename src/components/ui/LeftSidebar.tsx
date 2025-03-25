@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Models } from "node-appwrite";
 import React from "react";
 
 export const navItems = [
@@ -34,12 +35,11 @@ export const navItems = [
   },
 ];
 
-const LeftSidebar = () => {
+const LeftSidebar = ({ user }: { user?: Models.Document }) => {
   const path = usePathname();
-  console.log(path, "here is pathname");
 
   return (
-    <nav className="hidden h-full w-[20rem] flex-col gap-4 p-6 lg:flex">
+    <nav className="hidden h-full w-[30rem] flex-col gap-4 p-6 lg:flex">
       <Link href="/" className="mb-6">
         <Image
           src="/assets/icons/logo-full-brand.svg"
@@ -76,10 +76,10 @@ const LeftSidebar = () => {
       <div className="mt-auto flex flex-col gap-8">
         <Image src={"/assets/images/files-2.png"} width={506} height={418} alt="" />
         <div className="flex items-center gap-4">
-          <Image src={"/assets/icons/logo"} className="rounded-full" alt="" width={24} height={24} />
+          <Image src={"/assets/icons/logo-brand.svg"} className="rounded-full" alt="" width={24} height={24} />
           <div className="flex flex-col">
-            <span className="h5 text-dark-grey">Bishal Lamichhane</span>
-            <span className="text-light-grey body2">bishal.lamichhane@gmail.com</span>
+            <span className="h5 text-dark-grey">{user?.fullName}</span>
+            <span className="text-light-grey body2">{user?.email}</span>
           </div>
         </div>
       </div>
