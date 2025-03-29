@@ -5,13 +5,15 @@ import { Models } from "node-appwrite";
 import { cn, convertFileSize, getUsageSummary } from "@/lib/utils";
 import { Chart } from "./components/Chart";
 import { getFiles, getTotalSpaceUsed } from "@/actions/files.action";
-import Thumbnail from "@/components/ui/Thumbnail";
+import Thumbnail from "@/components/Thumbnail";
 import { Separator } from "@/components/ui/separator";
 import { formatDateTime } from "@/components/ui/formatDateTime";
-import ActionDropdown from "@/components/ui/ActionDropDown";
+import ActionDropdown from "@/components/ActionDropDown";
+import { customToast } from "@/components/ui/sonner";
 
 const Home = async () => {
   const [files, totalSpace] = await Promise.all([getFiles({ types: [], limit: 10 }), getTotalSpaceUsed()]);
+  if ("error" in files) return customToast(files.error, "error");
 
   const usageSummary = getUsageSummary(totalSpace);
 
@@ -51,7 +53,7 @@ const Home = async () => {
         {/* Recent files uploaded */}
         <section className="ml-auto h-full w-full max-w-[35rem] rounded-[20px] bg-white p-5 xl:mr-16 xl:p-8">
           <h2 className="h2 xl:h2 text-dark-grey">Recent files uploaded</h2>
-          {files.documents.length > 0 ? (
+          {!!files.documents.length ? (
             <ul className="mt-5 flex flex-col gap-5">
               {files.documents.slice(0, 9).map((file: Models.Document) => (
                 <Link href={file.url} target="_blank" className="flex items-center gap-3" key={file.$id}>

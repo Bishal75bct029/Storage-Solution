@@ -4,7 +4,7 @@ import { createAdminClient, createSessionClient } from "@/appwrite";
 import { getCurrentUser } from ".";
 import { envConfig } from "@/config";
 import { ID, Query } from "node-appwrite";
-import { getFileType } from "@/components/ui/getFileType";
+import { getFileType } from "@/lib/getFileType";
 import { InputFile } from "node-appwrite/file";
 import { constructFileUrl } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
@@ -49,7 +49,9 @@ export const getFiles = async ({ types = [], searchText = "", sort = "$createdAt
   try {
     const currentUser = await getCurrentUser();
 
-    if (!currentUser) throw new Error("User not found");
+    if (!currentUser) {
+      return { error: "User not found" };
+    }
 
     const [sortBy, order] = sort.split("-");
     const queries = [
@@ -101,13 +103,13 @@ export const uploadFile = async ({ file, ownerId, accountId, path }: FileUploadP
       .createDocument(envConfig.databaseId!, envConfig.filesCollectionId!, ID.unique(), fileDocument)
       .catch(async () => {
         await storage.deleteFile(envConfig.bucketId!, bucketFile.$id);
-        throw new Error("Failed to create file document");
+        return { error: "Failed to create file document" };
       });
 
     revalidatePath(path);
     return newFile;
   } catch {
-    throw new Error("file upload error");
+    return { error: "File upload error" };
   }
 };
 
@@ -123,7 +125,7 @@ export const renameFile = async ({ fileId, name, extension, path }: RenameFilePr
     revalidatePath(path);
     return updatedFile;
   } catch {
-    throw new Error("Failed to rename file");
+    return { error: "Failed to rename file" };
   }
 };
 
@@ -140,7 +142,7 @@ export const deleteFile = async ({ fileId, bucketFileId, path }: DeleteFileProps
     revalidatePath(path);
     return { status: "success" };
   } catch {
-    throw new Error("Failed to rename file");
+    return { error: "Failed to rename file" };
   }
 };
 
@@ -161,7 +163,7 @@ export const updateFileUsers = async ({ fileId, emails, path, isNewShare = false
       const invalidEmails = emails.filter((email) => !foundEmails.includes(email));
 
       if (invalidEmails.length) {
-        throw new Error(`The given emails do not exist.`);
+        return { error: `The given emails do not exist.` };
       }
     }
 
@@ -181,8 +183,8 @@ export const updateFileUsers = async ({ fileId, emails, path, isNewShare = false
 
     revalidatePath(path);
     return updatedFile;
-  } catch (error) {
-    throw error;
+  } catch (error: any) {
+    return { error: error.message };
   }
 };
 

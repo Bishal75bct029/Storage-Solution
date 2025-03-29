@@ -6,13 +6,13 @@ import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import Thumbnail from "@/components/ui/Thumbnail";
+import Thumbnail from "@/components/Thumbnail";
 import { MAX_FILE_SIZE } from "@/constants";
 import { usePathname } from "next/navigation";
-import { convertFileToUrl } from "./formatDateTime";
-import { getFileType } from "./getFileType";
+import { convertFileToUrl } from "./ui/formatDateTime";
+import { getFileType } from "../lib/getFileType";
 import { uploadFile } from "@/actions/files.action";
-import { customToast } from "./sonner";
+import { customToast } from "./ui/sonner";
 
 interface Props {
   ownerId: string;
@@ -36,14 +36,15 @@ const FileUploader = ({ ownerId, accountId, className }: Props) => {
           return customToast("Please upload file of size less than 10MB.", "error");
         }
 
-        return uploadFile({ file, ownerId, accountId, path })
-          .then((uploadedFile) => {
-            if (uploadedFile) {
-              setFiles((prevFiles) => prevFiles.filter((f) => f.name !== file.name));
-              customToast("File uploaded successfully.", "success");
-            }
-          })
-          .catch((e) => customToast(e.message, "error"));
+        return uploadFile({ file, ownerId, accountId, path }).then((res) => {
+          if (res?.error) {
+            customToast(res.error, "error");
+            return false;
+          }
+
+          setFiles((prevFiles) => prevFiles.filter((f) => f.name !== file.name));
+          customToast("File uploaded successfully.", "success");
+        });
       });
 
       await Promise.all(uploadPromises);

@@ -42,15 +42,11 @@ const AuthForm = ({ type }: { type: AuthType }) => {
           ? await signUp({ fullName: "username" in values ? values.username : "", email: values.email })
           : await login({ email: values.email });
 
-      if (!user.accountId) {
-        return customToast("User not found.", "error");
-      }
+      if (user.error) return customToast(user.error, "error");
 
       setAccountId(user.accountId);
       setOpenDialog(true);
-    } catch (e: any) {
-      console.log("hello");
-      customToast(String(e.message), "error");
+    } catch {
     } finally {
       setIsLoading(false);
     }
@@ -125,8 +121,10 @@ const AuthForm = ({ type }: { type: AuthType }) => {
                 <Image src={"assets/icons/loader.svg"} className="animate-spin" width={24} height={24} alt="" />
                 {type === "sign-in" ? "Signing in..." : "Signing Up..."}
               </>
-            ) : (
+            ) : type === "sign-in" ? (
               "Login"
+            ) : (
+              "Continue"
             )}
           </Button>
           {type === "sign-up" ? (

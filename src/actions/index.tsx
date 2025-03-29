@@ -98,12 +98,12 @@ export const signUp = async ({ fullName, email }: { fullName: string; email: str
   const existingUser = await getUserByEmail(email);
 
   const accountId = await sendEmailOtp(email);
-  if (!accountId) throw new Error("Failed to send an OTP");
+  if (!accountId) return { error: "Failed to send an OTP" };
 
   if (!existingUser) {
     const { databases } = await createAdminClient();
     const users = await databases.listDocuments(envConfig.databaseId!, envConfig.usersCollectionId!);
-    if (users.total >= 5) throw new Error("User limit exceeded.");
+    if (users.total >= 5) return { error: "User limit exceeded." };
 
     await databases.createDocument(envConfig.databaseId!, envConfig.usersCollectionId!, ID.unique(), {
       fullName,

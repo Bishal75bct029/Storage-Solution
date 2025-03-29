@@ -1,9 +1,9 @@
 import React from "react";
-import LeftSidebar from "@/components/ui/LeftSidebar";
-import Header from "@/components/ui/Header";
+import LeftSidebar from "@/components/LeftSidebar";
+import Header from "@/components/Header";
 import { getCurrentUser } from "@/actions";
 import { redirect } from "next/navigation";
-import MobileNav from "@/components/ui/MobileNav";
+import MobileNav from "@/components/MobileNav";
 
 const layout = async ({ children }: { children: Promise<React.ReactNode> }) => {
   const currentUser = await getCurrentUser();

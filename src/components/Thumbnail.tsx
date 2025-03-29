@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { getFileIcon } from "./getFileIcon";
+import { getFileIcon } from "../lib/getFileIcon";
 
 interface Props {
   type: string;

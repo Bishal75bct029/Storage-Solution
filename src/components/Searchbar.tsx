@@ -7,9 +7,10 @@ import Image from "next/image";
 
 import { getFiles } from "@/actions/files.action";
 import Thumbnail from "./Thumbnail";
-import { Input } from "./input";
-import { formatDateTime } from "./formatDateTime";
+import { Input } from "./ui/input";
+import { formatDateTime } from "./ui/formatDateTime";
 import { cn } from "@/lib/utils";
+import { customToast } from "./ui/sonner";
 
 const Searchbar = () => {
   const [query, setQuery] = useState("");
@@ -35,6 +36,8 @@ const Searchbar = () => {
       router.push(path.replace(searchParams.toString(), ""));
 
       const files = await getFiles({ types: [], searchText: query });
+      if ("error" in files) return customToast(files.error, "error");
+
       setResults(files.documents);
       setOpen(true);
     }, 500);

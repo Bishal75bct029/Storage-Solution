@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Button } from "./button";
+import { Button } from "./ui/button";
 import Searchbar from "./Searchbar";
 import { logout } from "@/actions";
 import FileUploader from "./FileUploader";

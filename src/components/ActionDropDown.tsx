@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { deleteFile, renameFile, updateFileUsers } from "@/actions/files.action";
 import { usePathname } from "next/navigation";
 import { FileDetails, ShareInput } from "./ActionModalContent";
-import { customToast } from "./sonner";
+import { customToast } from "./ui/sonner";
 
 type ActionType = {
   label: string;
@@ -53,35 +53,33 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
 
     const actions = {
       rename: () =>
-        renameFile({ fileId: file.$id, name, extension: file.extension, path })
-          .then(() => {
-            customToast("File renamed successfully.", "success");
-            return true;
-          })
-          .catch((e) => {
-            customToast(e.message, "error");
+        renameFile({ fileId: file.$id, name, extension: file.extension, path }).then((res) => {
+          if (res?.error) {
+            customToast(res.error, "error");
             return false;
-          }),
+          }
+          customToast("File renamed successfully.", "success");
+          return true;
+        }),
       share: () =>
-        updateFileUsers({ fileId: file.$id, emails, path, isNewShare: true })
-          .then(() => {
-            customToast("File shared successfully.", "success");
-            return true;
-          })
-          .catch((e) => {
-            customToast(e.message, "error");
+        updateFileUsers({ fileId: file.$id, emails, path, isNewShare: true }).then((res) => {
+          if (res?.error) {
+            customToast(res.error, "error");
             return false;
-          }),
+          }
+          customToast("File shared successfully.", "success");
+          return true;
+        }),
+
       delete: () =>
-        deleteFile({ fileId: file.$id, bucketFileId: file.bucketFileId, path })
-          .then(() => {
-            customToast("File deleted successfully.", "success");
-            return true;
-          })
-          .catch((e) => {
-            customToast(e.message, "error");
+        deleteFile({ fileId: file.$id, bucketFileId: file.bucketFileId, path }).then((res) => {
+          if (res?.error) {
+            customToast(res.error, "error");
             return false;
-          }),
+          }
+          customToast("File deleted successfully.", "success");
+          return true;
+        }),
     };
 
     success = !!(await actions[action.value as keyof typeof actions]());

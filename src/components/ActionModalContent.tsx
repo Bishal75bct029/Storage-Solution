@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Thumbnail from "./Thumbnail";
-import { formatDateTime } from "./formatDateTime";
+import { formatDateTime } from "./ui/formatDateTime";
 import { useForm } from "react-hook-form";
 
 const ImageThumbnail = ({ file }: { file: Models.Document }) => (

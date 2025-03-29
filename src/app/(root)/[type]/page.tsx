@@ -4,14 +4,15 @@ import { getFileTypesParams } from "@/lib/utils";
 import { getFiles } from "@/actions/files.action";
 import FileCard from "@/components/FileCard";
 import Sort from "@/components/ui/Sort";
+import { customToast } from "@/components/ui/sonner";
 
 type SearchParamProps = {
-  params?: Promise<any>;
+  params?: Promise<{ type: string }>;
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-const Page = async (searchParamsProps: Promise<SearchParamProps>) => {
-  const { params, searchParams } = await searchParamsProps;
+const Page = async (searchParamsProps: SearchParamProps) => {
+  const { params, searchParams } = searchParamsProps;
 
   const type = ((await params)?.type as string) || "";
   const searchText = ((await searchParams)?.query as string) || "";
@@ -20,6 +21,9 @@ const Page = async (searchParamsProps: Promise<SearchParamProps>) => {
   const types = getFileTypesParams(type) as FileType[];
 
   const files = await getFiles({ types, searchText, sort });
+  if ("error" in files) {
+    return customToast(files.error, "error");
+  }
   const size = files.documents.reduce((acc, file) => acc + (Number(file.size) || 0) / (1024 * 1024), 0).toFixed(2);
 
   return (
