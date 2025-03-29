@@ -33,7 +33,6 @@ export const verifySecret = async (accountId: string, password: string) => {
 
     return { sessionId: session.$id };
   } catch (error) {
-    console.log("are you here err", error);
     throw error;
   }
 };
@@ -103,6 +102,8 @@ export const signUp = async ({ fullName, email }: { fullName: string; email: str
 
   if (!existingUser) {
     const { databases } = await createAdminClient();
+    const users = await databases.listDocuments(envConfig.databaseId!, envConfig.usersCollectionId!);
+    if (users.total >= 5) throw new Error("User limit exceeded.");
 
     await databases.createDocument(envConfig.databaseId!, envConfig.usersCollectionId!, ID.unique(), {
       fullName,

@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { deleteFile, renameFile, updateFileUsers } from "@/actions/files.action";
 import { usePathname } from "next/navigation";
 import { FileDetails, ShareInput } from "./ActionModalContent";
+import { customToast } from "./sonner";
 
 type ActionType = {
   label: string;
@@ -42,7 +43,7 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
     setIsDropdownOpen(false);
     setAction(null);
     setName(file.name);
-    // setEmails([]);
+    setEmails([]);
   };
 
   const handleAction = async () => {
@@ -51,9 +52,36 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
     let success = false;
 
     const actions = {
-      rename: () => renameFile({ fileId: file.$id, name, extension: file.extension, path }),
-      share: () => updateFileUsers({ fileId: file.$id, emails, path, isNewShare: true }),
-      delete: () => deleteFile({ fileId: file.$id, bucketFileId: file.bucketFileId, path }),
+      rename: () =>
+        renameFile({ fileId: file.$id, name, extension: file.extension, path })
+          .then(() => {
+            customToast("File renamed successfully.", "success");
+            return true;
+          })
+          .catch((e) => {
+            customToast(e.message, "error");
+            return false;
+          }),
+      share: () =>
+        updateFileUsers({ fileId: file.$id, emails, path, isNewShare: true })
+          .then(() => {
+            customToast("File shared successfully.", "success");
+            return true;
+          })
+          .catch((e) => {
+            customToast(e.message, "error");
+            return false;
+          }),
+      delete: () =>
+        deleteFile({ fileId: file.$id, bucketFileId: file.bucketFileId, path })
+          .then(() => {
+            customToast("File deleted successfully.", "success");
+            return true;
+          })
+          .catch((e) => {
+            customToast(e.message, "error");
+            return false;
+          }),
     };
 
     success = !!(await actions[action.value as keyof typeof actions]());
@@ -64,16 +92,22 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
   };
 
   const handleRemoveUser = async (email: string) => {
-    console.log(email, "here is removing mail");
-    const updatedEmails = emails.filter((e) => e !== email);
-    console.log(updatedEmails, "updated emails are here", emails, "original emails");
+    const updatedEmails = file.users.filter((e: string) => e !== email);
 
     const success = await updateFileUsers({
       fileId: file.$id,
       emails: updatedEmails,
       isNewShare: false,
       path,
-    });
+    })
+      .then(() => {
+        customToast("Successfully update share list.", "success");
+        return true;
+      })
+      .catch((e) => {
+        customToast(e.message, "error");
+        return false;
+      });
 
     if (success) setEmails(updatedEmails);
     closeAllModals();
@@ -88,9 +122,20 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
       <DialogContent className="button outline-none focus:ring-0 focus:ring-offset-0 focus-visible:border-none focus-visible:ring-transparent focus-visible:ring-offset-0 focus-visible:outline-none">
         <DialogHeader className="flex flex-col gap-3">
           <DialogTitle className="text-dark-grey text-center">{label}</DialogTitle>
-          {value === "rename" && <Input type="text" value={name} onChange={(e) => setName(e.target.value)} />}
+          {value === "rename" && (
+            <Input
+              type="text"
+              value={name}
+              onChange={(e) => {
+                e.stopPropagation();
+                setName(e.target.value);
+              }}
+            />
+          )}
           {value === "details" && <FileDetails file={file} />}
-          {value === "share" && <ShareInput file={file} onInputChange={setEmails} onRemove={handleRemoveUser} />}
+          {value === "share" && (
+            <ShareInput sharedEmails={emails} file={file} onInputChange={setEmails} onRemove={handleRemoveUser} />
+          )}
           {value === "delete" && (
             <p className="text-dark-grey text-center">
               Are you sure you want to delete{` `}
@@ -108,7 +153,7 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
             </Button>
             <Button
               onClick={handleAction}
-              disabled={isLoading}
+              disabled={isLoading || (value === "share" && !emails.length)}
               className="bg-light-orange hover:bg-dark-orange button !mx-0 w-full flex-1 rounded-full transition-all"
             >
               <p className="capitalize">{value}</p>

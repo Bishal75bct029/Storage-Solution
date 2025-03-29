@@ -3,10 +3,9 @@ import LeftSidebar from "@/components/ui/LeftSidebar";
 import Header from "@/components/ui/Header";
 import { getCurrentUser } from "@/actions";
 import { redirect } from "next/navigation";
-import { envConfig } from "@/config";
+import MobileNav from "@/components/ui/MobileNav";
 
 const layout = async ({ children }: { children: Promise<React.ReactNode> }) => {
-  console.log(envConfig.endpointUrl, envConfig.projectId);
   const currentUser = await getCurrentUser();
 
   if (!currentUser) return redirect("/sign-in");
@@ -15,6 +14,7 @@ const layout = async ({ children }: { children: Promise<React.ReactNode> }) => {
     <div className="flex h-screen">
       <LeftSidebar user={currentUser} />
       <div className="flex h-full w-full flex-col gap-4">
+        <MobileNav user={currentUser} />
         <Header userId={currentUser.$id} accountId={currentUser.accountId} />
         {await children}
       </div>

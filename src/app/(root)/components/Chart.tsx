@@ -62,7 +62,7 @@ export const Chart = ({ used = 1 }: { used: number }) => {
       <CardHeader className="flex-1 items-start justify-self-center px-3 py-0 sm:px-5 lg:p-3 xl:pr-5">
         <CardTitle className="h3 font-bold md:text-center lg:text-left">Available Storage</CardTitle>
         <CardDescription className="subtitle1 mt-2 w-full text-white/70 md:text-center lg:text-left">
-          {used ? convertFileSize(used) : "2GB"} / 2GB
+          {used ? convertFileSize(used) : "400MB"} / 400MB
         </CardDescription>
       </CardHeader>
     </Card>

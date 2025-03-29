@@ -29,15 +29,12 @@ const Searchbar = () => {
       return;
     }
 
-    console.log("nepali babu", query);
     const delayFetch = setTimeout(async () => {
-      console.log("it is called");
       setResults([]);
       setOpen(false);
       router.push(path.replace(searchParams.toString(), ""));
 
       const files = await getFiles({ types: [], searchText: query });
-      console.log(files, "here are results of search");
       setResults(files.documents);
       setOpen(true);
     }, 500);

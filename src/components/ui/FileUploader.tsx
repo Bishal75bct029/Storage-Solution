@@ -12,6 +12,7 @@ import { usePathname } from "next/navigation";
 import { convertFileToUrl } from "./formatDateTime";
 import { getFileType } from "./getFileType";
 import { uploadFile } from "@/actions/files.action";
+import { customToast } from "./sonner";
 
 interface Props {
   ownerId: string;
@@ -23,34 +24,26 @@ const FileUploader = ({ ownerId, accountId, className }: Props) => {
   const path = usePathname();
   //   const { toast } = useToast();
   const [files, setFiles] = useState<File[]>([]);
-  console.log(files, "here is me");
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
-      console.log(acceptedFiles, "accepted");
       setFiles(acceptedFiles);
 
       const uploadPromises = acceptedFiles.map(async (file) => {
         if (file.size > MAX_FILE_SIZE) {
           setFiles((prevFiles) => prevFiles.filter((f) => f.name !== file.name));
 
-          return;
-          //   toast({
-          //     description: (
-          //       <p className="body-2 text-white">
-          //         <span className="font-semibold">{file.name}</span> is too large. Max file size is 50MB.
-          //       </p>
-          //     ),
-          //     className: "error-toast",
-          //   });
+          return customToast("Please upload file of size less than 10MB.", "error");
         }
 
-        return uploadFile({ file, ownerId, accountId, path }).then((uploadedFile) => {
-          console.log("boy");
-          if (uploadedFile) {
-            setFiles((prevFiles) => prevFiles.filter((f) => f.name !== file.name));
-          }
-        });
+        return uploadFile({ file, ownerId, accountId, path })
+          .then((uploadedFile) => {
+            if (uploadedFile) {
+              setFiles((prevFiles) => prevFiles.filter((f) => f.name !== file.name));
+              customToast("File uploaded successfully.", "success");
+            }
+          })
+          .catch((e) => customToast(e.message, "error"));
       });
 
       await Promise.all(uploadPromises);

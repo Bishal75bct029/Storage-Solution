@@ -14,6 +14,7 @@ import { signInSchema, signUpSchema } from "../authSchema";
 import { cn } from "@/lib/utils";
 import OtpDialog from "./OtpDIalog";
 import { login, signUp } from "@/actions";
+import { customToast } from "@/components/ui/sonner";
 
 type AuthType = "sign-in" | "sign-up";
 
@@ -41,12 +42,15 @@ const AuthForm = ({ type }: { type: AuthType }) => {
           ? await signUp({ fullName: "username" in values ? values.username : "", email: values.email })
           : await login({ email: values.email });
 
-      if (!user.accountId) throw new Error("User not found");
+      if (!user.accountId) {
+        return customToast("User not found.", "error");
+      }
 
       setAccountId(user.accountId);
       setOpenDialog(true);
-    } catch {
+    } catch (e: any) {
       console.log("hello");
+      customToast(String(e.message), "error");
     } finally {
       setIsLoading(false);
     }

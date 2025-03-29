@@ -11,7 +11,7 @@ type HeaderProps = {
 
 const Header: React.FC<HeaderProps> = ({ userId, accountId }) => {
   return (
-    <header className="m-6 hidden items-center justify-between gap-5 sm:flex xl:gap-10">
+    <header className="m-6 hidden items-center justify-between gap-5 lg:flex xl:gap-10">
       <Searchbar />
       <div className="flex-center flex min-w-fit gap-4">
         <FileUploader ownerId={userId} accountId={accountId} />

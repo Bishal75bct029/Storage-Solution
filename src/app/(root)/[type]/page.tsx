@@ -23,7 +23,7 @@ const Page = async (searchParamsProps: Promise<SearchParamProps>) => {
   const size = files.documents.reduce((acc, file) => acc + (Number(file.size) || 0) / (1024 * 1024), 0).toFixed(2);
 
   return (
-    <div className="bg-light-white scrollbar mr-6 h-full max-h-[90%] overflow-y-scroll rounded-4xl p-6 pb-0">
+    <div className="lg:bg-light-white scrollbar mr-6 h-full max-h-[90%] overflow-y-scroll rounded-4xl bg-none p-6 pb-0">
       <div className="flex w-full max-w-7xl flex-col items-center gap-8">
         <section className="w-full">
           <h1 className="h1 capitalize">{type}</h1>

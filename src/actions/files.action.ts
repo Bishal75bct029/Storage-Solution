@@ -57,8 +57,15 @@ export const getFiles = async ({ types = [], searchText = "", sort = "$createdAt
       ...(types.length ? [Query.equal("type", types)] : []),
       ...(searchText ? [Query.contains("name", searchText)] : []),
       ...(limit ? [Query.limit(limit)] : []),
-      // ...(order === "asc" ? Query.orderAsc(sortBy) : Query.orderDesc(sortBy)),
     ];
+
+    if (sortBy && order) {
+      if (order === "asc") {
+        queries.push(Query.orderAsc(sortBy));
+      } else {
+        queries.push(Query.orderDesc(sortBy));
+      }
+    }
 
     const files = await databases.listDocuments(envConfig.databaseId!, envConfig.filesCollectionId!, queries);
     return files;
@@ -72,6 +79,9 @@ export const uploadFile = async ({ file, ownerId, accountId, path }: FileUploadP
 
   try {
     const inputFile = InputFile.fromBuffer(file, file.name);
+
+    const totalSpace = await getTotalSpaceUsed();
+    if (totalSpace && totalSpace.all - totalSpace.used < file.size) throw new Error("Enough space not available.");
 
     const bucketFile = await storage.createFile(envConfig.bucketId!, ID.unique(), inputFile);
 
@@ -89,15 +99,15 @@ export const uploadFile = async ({ file, ownerId, accountId, path }: FileUploadP
 
     const newFile = await databases
       .createDocument(envConfig.databaseId!, envConfig.filesCollectionId!, ID.unique(), fileDocument)
-      .catch(async (err) => {
+      .catch(async () => {
         await storage.deleteFile(envConfig.bucketId!, bucketFile.$id);
         throw new Error("Failed to create file document");
       });
 
     revalidatePath(path);
     return newFile;
-  } catch (err) {
-    console.log(err, "file upload error");
+  } catch {
+    throw new Error("file upload error");
   }
 };
 
@@ -112,8 +122,8 @@ export const renameFile = async ({ fileId, name, extension, path }: RenameFilePr
 
     revalidatePath(path);
     return updatedFile;
-  } catch (error) {
-    console.log(error, "Failed to rename file");
+  } catch {
+    throw new Error("Failed to rename file");
   }
 };
 
@@ -129,20 +139,36 @@ export const deleteFile = async ({ fileId, bucketFileId, path }: DeleteFileProps
 
     revalidatePath(path);
     return { status: "success" };
-  } catch (error) {
-    console.log(error, "Failed to rename file");
+  } catch {
+    throw new Error("Failed to rename file");
   }
 };
 
 export const updateFileUsers = async ({ fileId, emails, path, isNewShare = false }: UpdateFileUsersProps) => {
   const { databases } = await createAdminClient();
-  console.log(emails, "here are emails");
 
   try {
+    const currentUser = await getCurrentUser();
+    if (currentUser && emails.includes(currentUser.email)) throw new Error("You cannot share the file with yourself.");
+
+    if (emails.length) {
+      const userQuery = Query.contains("email", emails);
+      const usersResults = await databases.listDocuments(envConfig.databaseId!, envConfig.usersCollectionId!, [
+        userQuery,
+      ]);
+
+      const foundEmails = usersResults.documents.map((user) => user.email);
+      const invalidEmails = emails.filter((email) => !foundEmails.includes(email));
+
+      if (invalidEmails.length) {
+        throw new Error(`The given emails do not exist.`);
+      }
+    }
+
     if (isNewShare) {
       const document = await databases.getDocument(envConfig.databaseId!, envConfig.filesCollectionId!, fileId);
       const updatedFile = await databases.updateDocument(envConfig.databaseId!, envConfig.filesCollectionId!, fileId, {
-        users: [...document.users, ...emails],
+        users: [...new Set([...document.users, ...emails])],
       });
 
       revalidatePath(path);
@@ -153,12 +179,10 @@ export const updateFileUsers = async ({ fileId, emails, path, isNewShare = false
       users: emails,
     });
 
-    console.log(emails, "remaining emails");
-
     revalidatePath(path);
     return updatedFile;
   } catch (error) {
-    console.log(error, "Failed to rename file");
+    throw error;
   }
 };
 
@@ -194,6 +218,6 @@ export async function getTotalSpaceUsed() {
 
     return totalSpace;
   } catch (error) {
-    console.log(error, "Error calculating total space used:, ");
+    throw error;
   }
 }

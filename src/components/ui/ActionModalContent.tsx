@@ -1,11 +1,12 @@
 import { Models } from "node-appwrite";
 import { cn, convertFileSize } from "@/lib/utils";
-import React from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Thumbnail from "./Thumbnail";
 import { formatDateTime } from "./formatDateTime";
+import { useForm } from "react-hook-form";
 
 const ImageThumbnail = ({ file }: { file: Models.Document }) => (
   <div className="file-details-thumbnail">
@@ -40,12 +41,12 @@ export const FileDetails = ({ file }: { file: Models.Document }) => {
 
 interface Props {
   file: Models.Document;
+  sharedEmails: string[];
   onInputChange: React.Dispatch<React.SetStateAction<string[]>>;
   onRemove: (email: string) => void;
 }
 
-export const ShareInput = ({ file, onInputChange, onRemove }: Props) => {
-  console.log(file.users, "here are users");
+export const ShareInput = ({ file, onInputChange, onRemove, sharedEmails }: Props) => {
   return (
     <>
       <ImageThumbnail file={file} />
@@ -54,7 +55,16 @@ export const ShareInput = ({ file, onInputChange, onRemove }: Props) => {
         <Input
           type="email"
           placeholder="Enter email address"
-          onChange={(e) => onInputChange(e.target.value.trim().split(","))}
+          onChange={(e) => {
+            const emails = e.target.value
+              .split(",")
+              .map((email) => email.trim())
+              .filter((email) => email && !sharedEmails.includes(email));
+
+            if (emails.length) {
+              onInputChange([...emails]);
+            }
+          }}
           className="body2 !shad-no-focus !shadow-drop-1 h-[52px] w-full rounded-full border px-4"
         />
         <div className="pt-4">
